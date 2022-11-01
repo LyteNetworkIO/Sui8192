@@ -11,6 +11,7 @@ const {
   addClass, 
   removeClass,
   truncateMiddle,
+  formatBalance,
   setOnClick
 } = require('./utils');
 const modal = require('./modal');
@@ -29,41 +30,45 @@ let topTile = 2;
 let contentsInterval;
 let faucetUsed = false;
 
-window.onkeydown = (e) => {
-  let direction;
-  switch (e.keyCode) {
-    case 37: 
-      direction = "left";
-      break;
-    case 38: 
-      direction = "up";
-      break;
-    case 39: 
-      direction = "right";
-      break;
-    case 40: 
-      direction = "down";
-      break;
-  }
-  if (!direction) return;
-
-  e.preventDefault();
-  moves.execute(
-    direction, 
-    activeGameAddress, 
-    walletSigner,
-    (newBoard, direction) => {
-      handleResult(newBoard, direction);
-      loadWalletContents();
-    },
-    (error) => {
-      if (error) {
-        showUnknownError(error)
-      } else {
-        showGasError();
-      }
+const initializeKeyListener = () => {
+  window.onkeydown = (e) => {
+    let direction;
+    switch (e.keyCode) {
+      case 37: 
+        direction = "left";
+        break;
+      case 38: 
+        direction = "up";
+        break;
+      case 39: 
+        direction = "right";
+        break;
+      case 40: 
+        direction = "down";
+        break;
     }
-  );
+    if (!direction) return;
+  
+    e.preventDefault();
+    moves.execute(
+      direction, 
+      activeGameAddress, 
+      walletSigner,
+      (newBoard, direction) => {
+        handleResult(newBoard, direction);
+        loadWalletContents();
+      },
+      ({ error, gameOver }) => {
+        if (gameOver) {
+          showGameOver();
+        } else if (error) {
+          showUnknownError(error)
+        } else {
+          showGasError();
+        }
+      }
+    );
+  }
 }
 
 function init() {
@@ -163,6 +168,11 @@ function showGasError() {
   removeClass(eById("error-gas"), 'hidden');
 }
 
+function showGameOver() {
+  queue.removeAll()
+  removeClass(eById("error-game-over"), 'hidden');
+}
+
 function showUnknownError(error) {
   queue.removeAll()
   eById('error-unknown-message').innerHTML = error;
@@ -173,17 +183,15 @@ async function syncAccountState() {
   if (!walletSigner) return;
   try {
     const address =  await walletSigner.getAddress();
-    const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/', true, '0.11.0');
+    const provider = new JsonRpcProvider('https://fullnode.devnet.sui.io/');
     await provider.syncAccountState(address);
   } catch (e) {}
 }
 
-async function tryDrip() {
+async function tryDrip(address, balance) {
   if (!walletSigner || faucetUsed) return;
 
   faucetUsed = true;
-
-  const address =  await walletSigner.getAddress();
 
   let success;
   try {
@@ -222,11 +230,10 @@ async function loadWalletContents() {
   const balance = walletContents.balance || 0;
 
   if (balance < 5000000) {
-    tryDrip(address);
+    tryDrip(address, balance);
   }
 
-  const balanceSting = (balance || "").toString();
-  eById('balance').innerHTML = balanceSting.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + ' SUI';
+  eById('balance').innerHTML = formatBalance(balance, 9) + ' SUI';
 }
 
 async function loadGames() {
@@ -325,6 +332,7 @@ async function loadGames() {
 }
 
 async function setActiveGame(game) {
+  initializeKeyListener();
   activeGameAddress = game.address;
 
   eById('transactions-list').innerHTML = "";
@@ -492,7 +500,7 @@ const onWalletConnected = async ({ signer }) => {
               moduleName: 'game_8192',
               functionName: 'create',
               inputValues: [],
-              gasBudget: 5000
+              gasBudget: 10000
             };
 
             try {
@@ -501,7 +509,8 @@ const onWalletConnected = async ({ signer }) => {
                 details
               })
 
-              if (!data) {
+              if (!data || data.error) {
+                eById('create-error-error-message').innerHTML = data.error;
                 modal.open('create-error', 'container');
                 return;
               }
@@ -524,6 +533,7 @@ const onWalletConnected = async ({ signer }) => {
               setActiveGame(game);
               ethos.hideWallet();
             } catch (e) {
+              eById('create-error-error-message').innerHTML = e;
               modal.open('create-error', 'container');
               return;
             }
