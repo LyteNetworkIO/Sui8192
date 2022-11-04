@@ -1,8 +1,10 @@
-# Sui 8192
+# Suizzle
 
-A fully on-chain, extra challenging version of the popular 2048 game. Built on [Sui](https://sui.io) by [Ethos](https://ethoswallet.xyz).
+A peer-to-peer electronic puzzle game.
 
-You can play Sui 8192 at [https://ethoswallet.github.io/Sui8192](https://ethoswallet.github.io/Sui8192)
+You can play Suizzle at [https:/suizzle.com](https://suizzle.com)
+
+Suizzle was originally a fork of Sui 8192 by Ethos Wallet. The rest of the readmy is from that repo.
 
 Sui 8192 consists of a smart contract that allows the player to mint a game that is playable on chain.
 
