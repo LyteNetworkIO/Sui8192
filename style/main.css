@@ -5,7 +5,7 @@ body {
   line-height: 24px;
   background-image: url("./images/puzzle-background.png");
   background-repeat: no-repeat; /* Do not repeat the image */
-  background-size: cover;
+  background-size: auto;
 }
 
 body button {
