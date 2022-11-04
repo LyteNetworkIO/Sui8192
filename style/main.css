@@ -1,8 +1,11 @@
 body {
   font-family: Inter;
-  background-color: #fbfaf9;
+  background-color: ;
   font-size: 14px;
   line-height: 24px;
+  background-image: url("./images/puzzle-background.png");
+  background-repeat: no-repeat; /* Do not repeat the image */
+  background-size: cover;
 }
 
 body button {
@@ -1182,3 +1185,10 @@ a:visited.link-button {
     display: none !important;
   }
 }
+
+h1, h2 {
+  color: #fbfaf9;
+  font-family: Arial Black, Helvetica, Arial, sans-serif;
+}
+
+
