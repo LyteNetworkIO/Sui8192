@@ -2,7 +2,7 @@
 
 A peer-to-peer electronic puzzle game.
 
-You can play Suizzle at [https:/suizzle.com](https://suizzle.com)
+You can play Suizzle at [https://suizzle.com](https://suizzle.com)
 
 Suizzle was originally a fork of Sui 8192 by Ethos Wallet. The rest of the readmy is from that repo.
 
